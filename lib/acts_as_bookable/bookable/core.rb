@@ -222,13 +222,14 @@ module ActsAsBookable::Bookable
             intervals = overlapped.map { |e| {time_start: e.time_start, time_end: e.time_end, amount: e.amount} }
             # Make subintervals from overlapped bookings and check capacity for each of them
             ActsAsBookable::TimeUtils.subintervals(intervals) do |a,b,op|
-              case op
-              when :open
-                res = {amount: a[:amount] + b[:amount]}
-              when :close
-                res = {amount: a[:amount] - b[:amount]}
-              end
-              raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s) if (res[:amount] >= self.capacity)
+              res = { amount: a[:amount] + b[:amount] }
+              # case op
+              # when :open
+              #   res = {amount: a[:amount] + b[:amount]}
+              # when :close
+              #   res = {amount: a[:amount] - b[:amount]}
+              # end
+              raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s) if (res[:amount] > self.capacity)
               res
             end
           # else, just sum the amounts (fixed times are not intervals and they overlap if are the same)
